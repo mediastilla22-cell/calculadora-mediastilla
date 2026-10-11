@@ -49,6 +49,20 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:4px 18px 28px
       <option value="grande">Grande — referencia 40 × 50 cm</option>
       <option value="extra">Extra grande — definir presupuesto</option>
     </select>
+    <div class="grid">
+  <div>
+    <label for="ancho">Ancho del cuadro (cm)</label>
+    <input id="ancho" type="number" min="1" max="46" value="24">
+  </div>
+  <div>
+    <label for="largo">Largo del cuadro (cm)</label>
+    <input id="largo" type="number" min="1" max="46" value="35">
+  </div>
+</div>
+<p class="small" id="avisoMedidas"></p>
+  <label for="costoUnion">Costo adicional por unir tablas ($)</label>
+  <input id="costoUnion" type="number" min="0" value="0">
+</div>
     <label for="relief">Complejidad del relieve</label>
     <select id="relief">
       <option value="simple">Sencillo</option>
@@ -129,16 +143,53 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:4px 18px 28px
 const $=id=>document.getElementById(id);
 const money=n=>new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(Math.round(n));
 const defaults={size:'mediano',relief:'normal',design:'catalogo',qty:1,finish:'included',board:25000,yield:6,other:1500,wear:2500,labor:20000,margin:20};
+  const STORAGE_KEY='mediastilla-costos-v1';
+function loadSavedValues(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+    for(const [k,v] of Object.entries(saved)){
+      if($(k)) $(k).value=v;
+    }
+  }catch(e){}
+}
+function saveValues(){
+  const values={};
+  document.querySelectorAll('select,input').forEach(el=>{
+    if(el.id) values[el.id]=el.value;
+  });
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(values));
+  }catch(e){}
+}
+  const MAX_CNC=46;
+const MAX_TABLA=30;
+const defaultsMedidas={ancho:24,largo:35,union:0};
 function val(id){return Math.max(0,Number($(id).value)||0)}
 function calculate(){
  const size=$('size').value, relief=$('relief').value, design=$('design').value, finish=$('finish').value;
  const qty=Math.max(1,Math.min(100,Math.floor(val('qty')||1)));
+  const ancho=val('ancho');
+const largo=val('largo');
+const costoUnion=val('costoUnion');
  const base={chico:35000,mediano:50000,grande:85000,extra:110000}[size];
  const r={simple:-5000,normal:0,detallado:15000,profundo:30000}[relief];
  const d={catalogo:0,adaptado:15000,exclusivo:30000}[design];
  const f={included:0,none:-1500,premium:7000}[finish];
  const wholesale=qty>=6?0.12:qty>=3?0.08:0;
- const raw=base+r+d+f;
+ const areaBase=24*35;
+const areaReal=ancho*largo;
+const precioPorMedida=base*(areaReal/areaBase);
+const necesitaUnion=ancho>MAX_TABLA;
+const fueraCNC=ancho>MAX_CNC||largo>MAX_CNC;
+const raw=precioPorMedida+r+d+f+(necesitaUnion?costoUnion:0);
+$('avisoMedidas').textContent = fueraCNC
+  ? 'ATENCIÓN: la medida supera el área máxima de tu CNC (46 × 46 cm).'
+  : necesitaUnion
+    ? 'Aviso: el ancho supera los 30 cm de una tabla de cedro; calculá una unión.'
+    : 'Medida dentro del área de la CNC.';
+
+$('ancho').setCustomValidity(ancho > MAX_CNC ? 'El ancho máximo es 46 cm.' : '');
+$('largo').setCustomValidity(largo > MAX_CNC ? 'El largo máximo es 46 cm.' : '');
  const suggested=Math.max(0,Math.round(raw*(1-wholesale)/1000)*1000);
  const wood=val('board')/Math.max(1,val('yield')||1);
  const cost=wood+val('other')+val('wear')+val('labor');
@@ -154,6 +205,7 @@ function calculate(){
  ['Mano de obra y máquina por cuadro',money(val('labor'))],
  ['Costo estimado por cuadro',money(cost)],
  ['Costo estimado del pedido',money(costTotal)],
+ ['Costo adicional por unión de tablas',money(necesitaUnion?costUnion:0)],
  ['Diferencia estimada tras costos ingresados',money(marginValue)],
  ['Descuento por cantidad',Math.round(wholesale*100)+'%'],
  ['Margen adicional configurado',val('margin')+'% (referencia; no altera el precio base)']
@@ -161,15 +213,33 @@ function calculate(){
  $('breakdown').innerHTML=rows.map(([a,b])=>'<div class="breakdown"><span>'+a+'</span><strong>'+b+'</strong></div>').join('');
  return {size,relief,design,finish,qty,suggested,sales,costTotal,marginValue,wholesale};
 }
-document.querySelectorAll('select,input').forEach(el=>el.addEventListener('input',calculate));
+loadSavedValues();
+document.querySelectorAll('select,input').forEach(el=>{
+  el.addEventListener('input',()=>{
+    saveValues();
+    calculate();
+  });
+  el.addEventListener('change',()=>{
+    saveValues();
+    calculate();
+  });
+});
 $('copy').addEventListener('click',()=>{
  const x=calculate();
  const s=`Presupuesto MEDIASTILLA\\nCantidad: ${x.qty}\\nPrecio por cuadro: ${money(x.suggested)}\\nTotal: ${money(x.sales)}\\nIncluye la terminación seleccionada. Precio orientativo sujeto a confirmar diseño y plazo.`;
  if(navigator.clipboard && navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(()=>$('copied').textContent='Presupuesto copiado.').catch(()=>fallback(s));}else fallback(s);
  function fallback(text){const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();try{document.execCommand('copy');$('copied').textContent='Presupuesto copiado.';}catch(e){$('copied').textContent=text;}t.remove();}
 });
-$('reset').addEventListener('click',()=>{for(const [k,v] of Object.entries(defaults))$(k).value=v;calculate();$('copied').textContent='Valores restablecidos.';});
-calculate();
+$('reset').addEventListener('click',()=>{
+  for(const [k,v] of Object.entries(defaults)){
+    if($(k)) $(k).value=v;
+  }
+  try{
+    localStorage.removeItem(STORAGE_KEY);
+  }catch(e){}
+  calculate();
+  $('copied').textContent='Valores restablecidos.';
+});
 </script>
 </body>
 </html>

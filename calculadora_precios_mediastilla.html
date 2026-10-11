@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#5b3525">
+<title>MEDIASTILLA | Calculadora de precios</title>
+<style>
+:root{--wood:#5b3525;--cream:#faf6f0;--line:#e5d9cc;--muted:#74675d;--green:#236b49}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:#2b211b;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:var(--wood);color:white;padding:22px 18px 20px}
+header .brand{font-size:12px;letter-spacing:2px;opacity:.85;font-weight:700}
+h1{font-size:25px;margin:6px 0 4px}
+header p{margin:0;font-size:14px;opacity:.9}
+main{max-width:720px;margin:0 auto;padding:16px}
+.card{background:white;border:1px solid var(--line);border-radius:16px;padding:16px;margin:0 0 14px;box-shadow:0 3px 12px #4c2d1710}
+h2{font-size:17px;margin:0 0 13px}
+label{display:block;font-size:13px;font-weight:700;margin:11px 0 6px}
+select,input{width:100%;padding:12px;border:1px solid #cfc2b5;border-radius:10px;background:#fff;font:inherit;color:#2b211b}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.small{font-size:12px;color:var(--muted);line-height:1.45}
+.result{background:#f0f6f1;border:1px solid #c9dfcf;border-radius:14px;padding:16px}
+.result .label{font-size:13px;color:#416450;font-weight:700}
+.big{font-size:30px;font-weight:800;color:var(--green);margin:3px 0}
+.total{font-size:19px;font-weight:750}
+.breakdown{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #e5e5e5;font-size:14px}
+.breakdown:last-child{border-bottom:0}
+button{border:0;border-radius:11px;padding:13px 15px;font:inherit;font-weight:750;cursor:pointer}
+.primary{background:var(--wood);color:#fff;width:100%;margin-top:12px}
+.secondary{background:#eee5dc;color:#3b2b20;width:100%;margin-top:8px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:4px 18px 28px}
+@media(max-width:430px){.grid{grid-template-columns:1fr 1fr;gap:9px}.big{font-size:27px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">MEDIASTILLA22</div>
+  <h1>Calculadora de precios</h1>
+  <p>Cuadros de cedro · CNC · Personalizados y por mayor</p>
+</header>
+<main>
+  <section class="card">
+    <h2>1. Características del cuadro</h2>
+    <label for="size">Tamaño</label>
+    <select id="size">
+      <option value="chico">Chico — referencia 20 × 30 cm</option>
+      <option value="mediano" selected>Mediano — 35 × 24 cm</option>
+      <option value="grande">Grande — referencia 40 × 50 cm</option>
+      <option value="extra">Extra grande — definir presupuesto</option>
+    </select>
+    <label for="relief">Complejidad del relieve</label>
+    <select id="relief">
+      <option value="simple">Sencillo</option>
+      <option value="normal" selected>Estándar</option>
+      <option value="detallado">Muchos detalles finos</option>
+      <option value="profundo">Profundo / muy complejo</option>
+    </select>
+    <label for="design">Diseño</label>
+    <select id="design">
+      <option value="catalogo" selected>Diseño de catálogo</option>
+      <option value="adaptado">Adaptar imagen del cliente</option>
+      <option value="exclusivo">Diseño exclusivo complejo</option>
+    </select>
+    <div class="grid">
+      <div>
+        <label for="qty">Cantidad</label>
+        <input id="qty" type="number" min="1" max="100" value="1">
+      </div>
+      <div>
+        <label for="finish">Terminación</label>
+        <select id="finish">
+          <option value="included" selected>Barniz incluido</option>
+          <option value="none">Sin barniz</option>
+          <option value="premium">Terminación extra</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Ajustá tus costos (opcional)</h2>
+    <p class="small">Los importes son editables. La madera se calcula según tu dato: una tabla de $25.000 rinde 6 cuadros. Completá los otros costos para acercarte al precio real.</p>
+    <div class="grid">
+      <div>
+        <label for="board">Costo de tabla de cedro ($)</label>
+        <input id="board" type="number" min="0" value="25000">
+      </div>
+      <div>
+        <label for="yield">Cuadros por tabla</label>
+        <input id="yield" type="number" min="1" value="6">
+      </div>
+      <div>
+        <label for="other">Barniz y consumibles por cuadro ($)</label>
+        <input id="other" type="number" min="0" value="1500">
+      </div>
+      <div>
+        <label for="wear">Reserva fresas/mantenimiento por cuadro ($)</label>
+        <input id="wear" type="number" min="0" value="2500">
+      </div>
+      <div>
+        <label for="labor">Mano de obra y máquina por cuadro ($)</label>
+        <input id="labor" type="number" min="0" value="20000">
+      </div>
+      <div>
+        <label for="margin">Margen adicional (%)</label>
+        <input id="margin" type="number" min="0" max="300" value="20">
+      </div>
+    </div>
+    <p class="small">“Mano de obra y máquina” es un valor que vos elegís para remunerar tu tiempo y cubrir otros gastos. No se suma dos veces: se usa para estimar el costo y sugerir un precio.</p>
+  </section>
+
+  <section class="card">
+    <h2>3. Resultado estimado</h2>
+    <div class="result">
+      <div class="label">Precio sugerido por cuadro</div>
+      <div class="big" id="unit">$0</div>
+      <div class="label">Total del pedido</div>
+      <div class="total" id="total">$0</div>
+    </div>
+    <div style="margin-top:12px" id="breakdown"></div>
+    <button class="primary" id="copy">Copiar presupuesto</button>
+    <button class="secondary" id="reset">Restablecer valores iniciales</button>
+    <p class="small" id="copied" aria-live="polite"></p>
+  </section>
+  <footer>Calculadora orientativa de MEDIASTILLA. Revisá el tiempo real de CNC, las medidas y los costos antes de confirmar el presupuesto.</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const money=n=>new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(Math.round(n));
+const defaults={size:'mediano',relief:'normal',design:'catalogo',qty:1,finish:'included',board:25000,yield:6,other:1500,wear:2500,labor:20000,margin:20};
+function val(id){return Math.max(0,Number($(id).value)||0)}
+function calculate(){
+ const size=$('size').value, relief=$('relief').value, design=$('design').value, finish=$('finish').value;
+ const qty=Math.max(1,Math.min(100,Math.floor(val('qty')||1)));
+ const base={chico:35000,mediano:50000,grande:85000,extra:110000}[size];
+ const r={simple:-5000,normal:0,detallado:15000,profundo:30000}[relief];
+ const d={catalogo:0,adaptado:15000,exclusivo:30000}[design];
+ const f={included:0,none:-1500,premium:7000}[finish];
+ const wholesale=qty>=6?0.12:qty>=3?0.08:0;
+ const raw=base+r+d+f;
+ const suggested=Math.max(0,Math.round(raw*(1-wholesale)/1000)*1000);
+ const wood=val('board')/Math.max(1,val('yield')||1);
+ const cost=wood+val('other')+val('wear')+val('labor');
+ const costTotal=cost*qty;
+ const sales=suggested*qty;
+ const marginValue=sales-costTotal;
+ $('unit').textContent=money(suggested);
+ $('total').textContent=money(sales);
+ const rows=[
+ ['Madera estimada por cuadro',money(wood)],
+ ['Otros consumibles por cuadro',money(val('other'))],
+ ['Fresas y mantenimiento por cuadro',money(val('wear'))],
+ ['Mano de obra y máquina por cuadro',money(val('labor'))],
+ ['Costo estimado por cuadro',money(cost)],
+ ['Costo estimado del pedido',money(costTotal)],
+ ['Diferencia estimada tras costos ingresados',money(marginValue)],
+ ['Descuento por cantidad',Math.round(wholesale*100)+'%'],
+ ['Margen adicional configurado',val('margin')+'% (referencia; no altera el precio base)']
+ ];
+ $('breakdown').innerHTML=rows.map(([a,b])=>'<div class="breakdown"><span>'+a+'</span><strong>'+b+'</strong></div>').join('');
+ return {size,relief,design,finish,qty,suggested,sales,costTotal,marginValue,wholesale};
+}
+document.querySelectorAll('select,input').forEach(el=>el.addEventListener('input',calculate));
+$('copy').addEventListener('click',()=>{
+ const x=calculate();
+ const s=`Presupuesto MEDIASTILLA\\nCantidad: ${x.qty}\\nPrecio por cuadro: ${money(x.suggested)}\\nTotal: ${money(x.sales)}\\nIncluye la terminación seleccionada. Precio orientativo sujeto a confirmar diseño y plazo.`;
+ if(navigator.clipboard && navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(()=>$('copied').textContent='Presupuesto copiado.').catch(()=>fallback(s));}else fallback(s);
+ function fallback(text){const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();try{document.execCommand('copy');$('copied').textContent='Presupuesto copiado.';}catch(e){$('copied').textContent=text;}t.remove();}
+});
+$('reset').addEventListener('click',()=>{for(const [k,v] of Object.entries(defaults))$(k).value=v;calculate();$('copied').textContent='Valores restablecidos.';});
+calculate();
+</script>
+</body>
+</html>
